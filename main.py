@@ -1,53 +1,62 @@
 import sys
 import time
+import pickle
 from collections import Counter
 
 global_beg = time.time()
 beg = time.time()
-letter_dict = Counter()
 letters = sys.argv[1].split()
+letter_dict = Counter()
 for arg in letters:
     letter_dict[arg] += 1
 
 letter_dict['zero'] = 2
 letter_dict_count = sum(letter_dict.values())
-letter_point = Counter({'a': 9, 'e': 7, 'i': 8, 'n': 5, 'o': 6, 'r': 4, 's': 4, 'w': 4, 'z': 5, })
+letter_point = Counter({'a': 1, 'e': 1, 'i': 1, 'n': 1, 'o': 1, 'r': 1, 's': 1, 'w': 1, 'z': 1,'c':2, 'd':2,'k':2,'l':2,
+                        'm':2,'p':2,'t':2,'y':2,'b':3, 'g':3, 'h':3, 'j':3, 'ł':3, 'u':3, 'ą':5, 'ę':5, 'f':5, 'ó':5,
+                        'ś':5,'ż':5,'ć':6,'ń':7,'ź':9})
 
 
 end = time.time()
-print("Argumenty pobranow w: ")
+print("Argumenty pobrano w: ")
 print(end - beg)
 
-f = open("Frazy.txt", 'r')
+dictator = pickle.load(open("dictator.pkl","rb")) #dlugo zajmuje
 
 beg = time.time()
 victory_line = ''
-for line in f:
-    line_copy = line.replace(" ", "").replace("\n", "").replace(",", "")
+points = 0
 
-    # print("LINIA: "+line_copy+"  "+str(len(line_copy))+" "+str(letter_dict_count))
-    if len(line_copy) < letter_dict_count:
+#dictator = dict() #do testowania
+#dictator['i to by było na tyle'] = Counter("itobybyłonatyle") #do testowania
+
+for key in dictator:
+    temp = dictator[key]
+    line_length = sum(temp.values())
+    if line_length <= letter_dict_count:
         dict_copy = letter_dict.copy()
         success = True
-        for letter in line_copy:
-            if dict_copy[letter] > 0:
-                dict_copy[letter] -= 1
+        points_temp = 0
+        blank = 0
+        for value_key in temp:
+            number_letters = temp[value_key]
+            difference = dict_copy[value_key] - number_letters
+            if difference >= 0:
+                points_temp += letter_point[value_key] * number_letters
             else:
-                if dict_copy['zero'] > 0:
-                    dict_copy['zero'] -= 1
+                if difference-blank == -1:
+                    blank = -1
                 else:
                     success = False
-                    #print("fail "+line)
                     break
         if success:
-            print(line)
-
-            victory_line = line
-
+            if points_temp > points:
+                points = points_temp
+                victory_line = key
 
 
 end = time.time()
-print("Plik przeczytano w: ")
+print("Wybor slowa i podliczenie punktow w: ")
 print(end - beg)
 
 
@@ -55,10 +64,7 @@ global_end = time.time()
 print("Calosc trwala: ")
 print(global_end - global_beg)
 
-# beg = time.time()
-# end = time.time()
-# print(end - beg)
-#letter_point = Counter({'a': 9, 'e': 7, 'i': 8, 'n': 5, 'o': 6, 'r': 4, 's': 4, 'w': 4, 'z': 5})
+print("Wyrażenie: "+victory_line +" Punkty: "+ str(points))
 
 
 
